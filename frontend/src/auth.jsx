@@ -5,7 +5,27 @@ const Ctx = createContext(null);
 export const useAuth = () => useContext(Ctx);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
+  
+const [user, setUser] = useState(() => {
+  try {
+    const savedUser = localStorage.getItem('user');
+
+    if (
+      !savedUser ||
+      savedUser === 'undefined' ||
+      savedUser === 'null'
+    ) {
+      return null;
+    }
+
+    return JSON.parse(savedUser);
+  } catch (error) {
+    console.error('Invalid saved user data:', error);
+    localStorage.removeItem('user');
+    return null;
+  }
+});
+
 
   const login = async (username, password) => {
     const { data } = await api.post('/auth/login', { username, password });
