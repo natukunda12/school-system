@@ -140,12 +140,28 @@ router.post('/import/:batchId/confirm', wrap(async (req, res) => {
   let valid = batch.rows_data;
 
 if (typeof valid === 'string') {
-  try {
-    valid = JSON.parse(valid);
-  } catch (error) {
-    console.error('Invalid rows_data:', valid, error);
+  
+try {
+  if (typeof valid === 'string') {
+    if (
+      valid === 'undefined' ||
+      valid === 'null' ||
+      valid.trim() === ''
+    ) {
+      valid = [];
+    } else {
+      valid = JSON.parse(valid);
+    }
+  }
+
+  if (!Array.isArray(valid)) {
     valid = [];
   }
+} catch (error) {
+  console.error('Invalid rows_data:', valid, error);
+  valid = [];
+}
+
 }
 
 if (valid == null) {
