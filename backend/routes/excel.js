@@ -137,7 +137,20 @@ router.post('/import/:batchId/confirm', wrap(async (req, res) => {
   const [[batch]] = await pool.query('SELECT * FROM import_batches WHERE id = ?', [req.params.batchId]);
   if (!batch) throw new HttpError(404, 'Import not found');
   if (batch.status !== 'validated') throw new HttpError(409, `This import is already ${batch.status}`);
-  const valid = typeof batch.rows_data === 'string' ? JSON.parse(batch.rows_data) : batch.rows_data;
+  let valid = batch.rows_data;
+
+if (typeof valid === 'string') {
+  try {
+    valid = JSON.parse(valid);
+  } catch (error) {
+    console.error('Invalid rows_data:', valid, error);
+    valid = [];
+  }
+}
+
+if (valid == null) {
+  valid = [];
+}
 
   const [classes] = await pool.query('SELECT id, name FROM classes');
   const [combos] = await pool.query('SELECT id, code FROM combinations');
