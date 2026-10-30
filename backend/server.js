@@ -11,8 +11,9 @@ app.use(helmet());
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://school-system-upgj.onrender.com'
-];
+  'https://school-system-upgj.onrender.com',
+  process.env.CLIENT_URL
+].filter(Boolean);
 
 const corsOptions = {
   origin: function (origin, callback) {

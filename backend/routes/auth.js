@@ -5,19 +5,21 @@ const rateLimit = require('express-rate-limit');
 const pool = require('../config/db');
 const withTx = require('../utils/tx');
 const audit = require('../utils/audit');
+const { requireJwtSecret } = require('../utils/jwt');
 const { authenticate } = require('../middleware/auth');
 const { HttpError, wrap, required } = require('../utils/http');
 
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: { message: 'Too many attempts. Try again later' } });
 const norm = (p) => String(p || '').replace(/\D/g, '').slice(-9);
 
-function signToken(u, studentId) {
-  return jwt.sign({ id: u.id, role: u.role, name: u.full_name, studentId }, process.env.JWT_SECRET, {
+function signToken(u, studentId, secret) {
+  return jwt.sign({ id: u.id, role: u.role, name: u.full_name, studentId }, secret, {
     expiresIn: process.env.JWT_EXPIRES || '8h',
   });
 }
 
 router.post('/login', loginLimiter, wrap(async (req, res) => {
+  const jwtSecret = requireJwtSecret();
   required(req.body, ['username', 'password']);
   const [rows] = await pool.query(
     'SELECT u.*, r.name AS role FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.username = ?',
@@ -35,7 +37,7 @@ router.post('/login', loginLimiter, wrap(async (req, res) => {
   await pool.query('UPDATE users SET last_login_at = NOW() WHERE id = ?', [u.id]);
   req.user = { id: u.id };
   await audit(req, 'LOGIN', 'user', u.id);
-  res.json({ token: signToken(u, studentId), user: { id: u.id, name: u.full_name, username: u.username, role: u.role, studentId } });
+  res.json({ token: signToken(u, studentId, jwtSecret), user: { id: u.id, name: u.full_name, username: u.username, role: u.role, studentId } });
 }));
 
 // Student creates an account with Student ID + registered phone number

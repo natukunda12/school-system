@@ -20,7 +20,10 @@ cp .env.example .env        # on Windows: copy .env.example .env
 ```
 Open `.env` and set:
 - `DB_PASSWORD` to your MySQL password
+- `DB_NAME=school_management` (the default local database name)
 - `JWT_SECRET` to any long random text
+
+For local XAMPP MySQL, the example uses `localhost:3306` without TLS. Set `DB_PORT` to your local MySQL port if it differs. On the hosted backend, set `DB_HOST` and `DB_PORT` to the hosted database's values in the host's environment settings; remote hosts use verified TLS. Local `.env` values and hosted environment settings are separate, so changing the local port does not change the hosted connection.
 
 Then:
 ```bash
@@ -31,12 +34,17 @@ npm run dev         # API on http://localhost:5000
 ```
 If the database already exists, run `npm run db:migrate` from `backend` to add secure student QR tokens to existing records.
 
-## 3. Start the frontend (new terminal)
+## 3. Deploying the backend
+In the backend host's environment-variable settings, set `JWT_SECRET` to a long, random private value and `CLIENT_URL` to the frontend's origin (for example `https://school.example.com`, without a trailing slash). Set the database variables there too. Do not put `JWT_SECRET` in frontend settings, commit it to Git, or share it publicly. After saving the variables, restart or redeploy the backend. If `JWT_SECRET` is missing, login and authenticated API requests return a clear configuration error instead of failing while creating or verifying tokens. Changing the value invalidates existing login sessions.
+
+## 4. Start the frontend (new terminal)
 ```bash
 cd frontend
 npm install
 npm run dev         # open http://localhost:5173
 ```
+Local development uses the Vite proxy to send `/api` requests to `http://localhost:5000`; no frontend `.env` file is needed. If the deployed frontend and backend use different hostnames, set `VITE_API_URL` in the frontend build environment to the backend origin (for example `https://api.example.com`, without `/api`) and rebuild the frontend.
+
 Student profiles include a printable, landscape student identity card with a real QR code containing only a random opaque token. To use it, open **Students → Scan student QR**, or scan the code using the phone's camera. The website requires staff login before resolving the token or showing the student profile; profile and QR image APIs also enforce staff roles. In-app camera scanning requires a recent Chrome or Edge browser and a secure connection (HTTPS, or localhost); if camera scanning is unavailable, paste the card QR link instead.
 
 When printing cards for phone use, set `PUBLIC_APP_URL` in `backend/.env` to the frontend URL reachable by that phone before opening the student profile (for example `https://school.example.com`). For a local network URL, it must be reachable from the phone; HTTPS is needed for the in-app camera scanner.
@@ -46,10 +54,10 @@ The database already supports `photo_path`; super administrators and registrars 
 To scan permission cards with a phone on the same Wi-Fi, open the app on the computer using its LAN address (for example `http://192.168.1.20:5173`) instead of `localhost`. Find the address with `ipconfig` on Windows. The QR will use that address; keep the frontend running and allow Node.js through Windows Firewall if prompted. Staff must log in on the phone to see the student's information.
 For a deployed site, set `PUBLIC_APP_URL` in `backend/.env` to the frontend's reachable URL (for example `https://school.example.com`).
 
-## 4. First login
+## 5. First login
 Username: `admin`   Password: `Admin@12345`  (change it in `.env` before seeding, or reset it from Users)
 
-## 5. Try the full flow
+## 6. Try the full flow
 1. Log in as admin. Open **Students**, click **Register student** (tick "Register for current term"). Note the Student ID.
 2. Open that student's profile, upload a photo if available, then print the identity card. Use **Students → Scan student QR** or scan with a phone camera; a logged-out staff member will be sent to login before the profile opens.
 3. Log out. On the login page click **Create your account**. Enter the Student ID and the student or parent phone you typed. The system gives the student a username.

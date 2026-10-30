@@ -83,6 +83,8 @@ tr:hover td { background: rgba(47, 107, 58, 0.04); }
 
 .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--green-tint), var(--brown-tint)); padding: 16px; }
 .login-card { width: 100%; max-width: 380px; background: #fff; border-radius: 14px; padding: 24px; border: 1px solid var(--border); }
+.app-error { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; }
+.app-error p { margin: 0 0 8px; color: var(--muted); }
 .logo { width: 46px; height: 46px; border-radius: 10px; background: var(--green-tint); display: flex; align-items: center; justify-content: center; font-size: 24px; }
 .verify-box { text-align: center; padding: 26px; border-radius: 14px; }
 .verify-box.ok { background: var(--green-tint); } .verify-box.bad { background: var(--red-tint); }
