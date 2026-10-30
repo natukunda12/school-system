@@ -20,7 +20,7 @@ function signToken(u, studentId) {
 router.post('/login', loginLimiter, wrap(async (req, res) => {
   required(req.body, ['username', 'password']);
   const [rows] = await pool.query(
-    'SELECT u.*, r.name AS role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.username = ?',
+    'SELECT u.*, r.name AS role FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.username = ?',
     [String(req.body.username).trim()]
   );
   const u = rows[0];
@@ -98,7 +98,7 @@ router.post('/student-account', loginLimiter, wrap(async (req, res) => {
 
 router.get('/me', authenticate, wrap(async (req, res) => {
   const [rows] = await pool.query(
-    'SELECT u.id, u.full_name, u.username, u.email, u.phone, r.name AS role FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?',
+    'SELECT u.id, u.full_name, u.username, u.email, u.phone, r.name AS role FROM users u JOIN roles r ON r.role_id = u.role_id WHERE u.id = ?',
     [req.user.id]
   );
   res.json({ ...rows[0], studentId: req.user.studentId || null });

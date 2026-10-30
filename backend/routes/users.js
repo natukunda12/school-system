@@ -15,7 +15,7 @@ router.get('/roles', wrap(async (req, res) => {
 router.get('/', wrap(async (req, res) => {
   const [rows] = await pool.query(
     `SELECT u.id, u.full_name, u.username, u.email, u.phone, u.is_active, u.last_login_at, r.name AS role
-     FROM users u JOIN roles r ON r.id = u.role_id WHERE r.name <> 'student' ORDER BY u.full_name`
+     FROM users u JOIN roles r ON r.role_id = u.role_id WHERE r.name <> 'student' ORDER BY u.full_name`
   );
   res.json(rows);
 }));
